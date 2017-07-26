@@ -1,0 +1,23 @@
+{
+  "name": "ecomm-data-generator",
+  "version": "0.0.1",
+  "description": "Ecommerce Data Generator",
+  "main": "lib/index.js",
+  "author": "Viraj Trivedi <inf3cti0n95@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^8.0.16",
+    "@types/uuid": "^3.4.0",
+    "types": "node",
+    "typescript": "^2.4.2"
+  },
+  "dependencies": {
+    "@types/chance": "^0.7.33",
+    "@types/mysql": "^0.0.34",
+    "chance": "^1.0.10",
+    "rx-sql": "^0.0.2",
+    "rxjs": "^5.4.2",
+    "tables": "^0.0.5",
+    "uuid": "^3.1.0"
+  }
+}

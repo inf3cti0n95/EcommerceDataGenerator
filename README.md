@@ -11,6 +11,8 @@ sudo npm install -g typescript
 npm install
 ```
 
+## Run
+
 ```
 npm start
 ```

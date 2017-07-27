@@ -3,8 +3,14 @@ import { createConnection } from "mysql";
 import { Observable } from "rxjs";
 import { generateRandomInt } from "./utils";
 import { Chance } from "chance";
+import { Client, Producer } from "kafka-node";
 
 import { TransactionSystem } from "./TransactionSystem";
+
+const SERVER_ADDRESS = "localhost:2181";
+
+const kafkaClient = new Client(SERVER_ADDRESS)
+const kafkaProducer = new Producer(kafkaClient);
 
 const transactionSystem = new TransactionSystem({
     startOrderNumber: 1,
@@ -17,40 +23,61 @@ transactionSystem.orderReceived$()
     .mergeMap(
         (transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
             .map(transaction => {
-                console.log(JSON.stringify(transaction))
+                kafkaProducer.send(
+                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    (err,data) => {
+                        console.log(data)
+                    }
+                )
                 return transaction
             })
     )
     .mergeMap(
         (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
             .map(transaction => {
-                // If Shipped
-                console.log(JSON.stringify(transaction))
+                kafkaProducer.send(
+                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    (err,data) => {
+                        console.log(data)
+                    }
+                )
                 return transaction
             })
             .catch(transaction => {
-                // If Cancelled
-                console.log(JSON.stringify(transaction))
+                kafkaProducer.send(
+                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    (err,data) => {
+                        console.log(data)
+                    }
+                )
                 return Observable.empty()
             })
     )
     .mergeMap(
         (transaction: Transaction)  => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
             .map(transaction => {
-                // If Delivered
-                console.log(JSON.stringify(transaction))
+                kafkaProducer.send(
+                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    (err,data) => {
+                        console.log(data)
+                    }
+                )
                 return transaction
             })
             .catch(transaction => {
-                // If Returned
-                console.log(JSON.stringify(transaction))
+                kafkaProducer.send(
+                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    (err,data) => {
+                        console.log(data)
+                    }
+                )
                 return Observable.empty()
             })
     )
-    .repeatWhen(() => Observable.interval(2000))
+    .repeatWhen(() => Observable.interval(500))
     // .takeWhile(() => transactionSystem.lastOrderNumber < 5)
     .subscribe(
-        (transaction: Transaction) => console.log(transaction.order.status, transaction.order.orderId, transaction.order.timestamp),
+        (transaction: Transaction) => console.info("Order Sucessfull"),
         err => console.error(err),
-        () => console.info("complete")
+        () => console.info("Complete")
     );

@@ -16,7 +16,7 @@ export class TransactionSystem {
         this.lastOrderNumber = 0;
         this.DbConnection = DbConnection;
     }
-    getOrderDate = () => {
+    private getOrderDate = () => {
         if (this.currentSysTime.getTime() < Date.now())
             this.currentSysTime = new Date(this.currentSysTime.getTime() + generateRandomInt(500, 5000))
         else
@@ -24,12 +24,12 @@ export class TransactionSystem {
         return this.currentSysTime;
     }
 
-    getOrderId = () => {
+    private getOrderId = () => {
         this.lastOrderNumber = this.lastOrderNumber + 1;
         return "ORDER" + this.lastOrderNumber
     }
 
-    getCustomer = () => {
+    private getCustomer = () => {
         return new RxSQL(this.DbConnection).query<Customer[]>(format("SELECT * FROM customers WHERE customerId=?", [generateRandomInt(1, this.systemConfig.totalCustomer)]))
             .flatMap(result => result)
             .map(result => {
@@ -56,7 +56,7 @@ export class TransactionSystem {
             })
     }
 
-    getOrderItems = () =>
+    private getOrderItems = () =>
         this.getProducts().map(product => {
             let orderItem: OrderItem = {
                 product: product,
@@ -65,7 +65,7 @@ export class TransactionSystem {
             return orderItem
         }).toArray()
 
-    getCustomerAndOrderItems = () => {
+    private getCustomerAndOrderItems = () => {
         return this.getCustomer()
             .mergeMap(customer => this.getOrderItems().map(orderItems => ({ orderItems, customer })))
     }
@@ -95,8 +95,80 @@ export class TransactionSystem {
                             timestamp: this.getOrderDate()
                         }
                     }
+                    console.log(transaction.order.status)
                     observer.next(transaction)
                     observer.complete()
                 })
+        })
+    orderProcessed$ = (transaction: Transaction) =>
+        new Observable<Transaction>((observer: Observer<Transaction>) => {
+            let processedTransaction: Transaction = {
+                ...transaction,
+                order: {
+                    ...transaction.order,
+                    status: "PROCESSED",
+                }
+            }
+            console.log(processedTransaction.order.status)
+            observer.next(processedTransaction)
+            observer.complete()
+        })
+
+    orderShipped$ = (transaction: Transaction) =>
+        new Observable<Transaction>((observer: Observer<Transaction>) => {
+            let shippedTransaction: Transaction = {
+                ...transaction,
+                order: {
+                    ...transaction.order,
+                    status: "SHIPPED",
+                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(1,3)*24*60*60*1000)
+                }
+            }
+            console.log(shippedTransaction.order.status)
+            observer.next(shippedTransaction)
+            observer.complete()
+        })
+
+    orderDelivered$ = (transaction: Transaction) =>
+        new Observable<Transaction>((observer: Observer<Transaction>) => {
+            let deliveredTransaction: Transaction = {
+                ...transaction,
+                order: {
+                    ...transaction.order,
+                    status: "DELIVERED",
+                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2,7)*24*60*60*1000)
+                }
+            }
+            console.log(deliveredTransaction.order.status)
+            observer.next(deliveredTransaction)
+            observer.complete()
+        })
+
+    orderCancelled$ = (transaction: Transaction) =>
+        new Observable<Transaction>((observer: Observer<Transaction>) => {
+            let cancelledTransaction: Transaction = {
+                ...transaction,
+                order: {
+                    ...transaction.order,
+                    status: "CANCELLED",
+                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2,7)*24*60*60*1000)
+                }
+            }
+            console.log(cancelledTransaction.order.status)
+            observer.complete()
+        })
+    
+    orderReturned$ = (transaction: Transaction) =>
+        new Observable<Transaction>((observer: Observer<Transaction>) => {
+            let returnedTransaction: Transaction = {
+                ...transaction,
+                order: {
+                    ...transaction.order,
+                    status: "RETURNED",
+                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2,7)*24*60*60*1000)
+                }
+            }
+            console.log(returnedTransaction.order.status)
+            observer.complete()
         })
 }

@@ -2,6 +2,7 @@ import { RxSQL } from "rx-sql";
 import { createConnection } from "mysql";
 import { Observable } from "rxjs";
 import { generateRandomInt } from "./utils";
+import { Chance } from "chance";
 
 import { TransactionSystem } from "./TransactionSystem";
 
@@ -14,44 +15,16 @@ const transactionSystem = new TransactionSystem({
 
 transactionSystem.orderReceived$()
     .mergeMap(
-        transaction => {
-            console.log(transaction.order.status, transaction.order.orderId)
-            let processedtransaction: Transaction = {
-                ...transaction,
-                order: {
-                    ...transaction.order,
-                    status: "PROCESSED"
-                }
-            }
-            return Observable.of(processedtransaction)
+        transaction => transactionSystem.orderProcessed$(transaction)
+    )
+    .mergeMap(
+        transaction => {            
+            return Chance().bool({likelihood: 20}) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction)
         }
     )
     .mergeMap(
         transaction => {
-            console.log(transaction.order.status, transaction.order.orderId, transaction.order.timestamp)
-            let shippedtransaction: Transaction = {
-                ...transaction,
-                order: {
-                    ...transaction.order,
-                    status: "SHIPPED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(1,3)*24*60*60*1000)
-                }
-            }
-            return Observable.of(shippedtransaction)
-        }
-    )
-    .mergeMap(
-        transaction => {
-            console.log(transaction.order.status, transaction.order.orderId, transaction.order.timestamp)
-            let shippedtransaction: Transaction = {
-                ...transaction,
-                order: {
-                    ...transaction.order,
-                    status: "DELIVERED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(1,7)*24*60*60*1000)
-                }
-            }
-            return Observable.of(shippedtransaction)
+            return Chance().bool({likelihood: 15}) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction)
         }
     )
     .repeatWhen(() => Observable.interval(2000))

@@ -6,15 +6,17 @@ export declare class TransactionSystem {
     systemConfig: ITransactionSystemConfig;
     DbConnection: IConnection;
     constructor(systemConfig: ITransactionSystemConfig, DbConnection: IConnection);
-    getOrderDate: () => Date;
-    getOrderId: () => string;
-    getCustomer: () => Observable<Customer>;
+    private getOrderDate;
+    private getOrderId;
+    private getCustomer;
     private getProducts;
-    getOrderItems: () => Observable<OrderItem[]>;
-    getCustomerAndOrderItems: () => Observable<{
-        orderItems: OrderItem[];
-        customer: Customer;
-    }>;
+    private getOrderItems;
+    private getCustomerAndOrderItems;
     private generateRandomProducts;
     orderReceived$: () => Observable<Transaction>;
+    orderProcessed$: (transaction: Transaction) => Observable<Transaction>;
+    orderShipped$: (transaction: Transaction) => Observable<Transaction>;
+    orderDelivered$: (transaction: Transaction) => Observable<Transaction>;
+    orderCancelled$: (transaction: Transaction) => Observable<Transaction>;
+    orderReturned$: (transaction: Transaction) => Observable<Transaction>;
 }

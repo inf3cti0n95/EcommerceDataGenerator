@@ -2,7 +2,7 @@
 
 Generate Ecommerce Transaction Data
 
-##Setup
+## Setup
 
 Create tables in mysql with data in **data/ecomm.sql** file
 
@@ -16,3 +16,5 @@ npm install
 ```
 npm start
 ```
+
+### Kafka Producer to Stream Transactions on [kafka branch](https://github.com/inf3cti0n95/EcommerceDataGenerator/tree/kafka)

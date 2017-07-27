@@ -58,6 +58,6 @@ transactionSystem.orderReceived$()
     // .takeWhile(() => transactionSystem.lastOrderNumber < 5)
     .subscribe(
         transaction => console.log(transaction.order.status, transaction.order.orderId, transaction.order.timestamp),
-        null,
-        () => console.log("complete")
+        err => console.error(err),
+        () => console.info("complete")
     );

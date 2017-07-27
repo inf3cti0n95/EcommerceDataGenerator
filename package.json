@@ -5,6 +5,9 @@
   "main": "lib/index.js",
   "author": "Viraj Trivedi <inf3cti0n95@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "tsc && node lib/index.js"
+  },
   "devDependencies": {
     "@types/node": "^8.0.16",
     "@types/uuid": "^3.4.0",

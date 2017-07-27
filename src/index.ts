@@ -24,10 +24,12 @@ transactionSystem.orderReceived$()
     .mergeMap(
         (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
             .map(transaction => {
+                // If Shipped
                 console.log(JSON.stringify(transaction))
                 return transaction
             })
             .catch(transaction => {
+                // If Cancelled
                 console.log(JSON.stringify(transaction))
                 return Observable.empty()
             })
@@ -35,10 +37,12 @@ transactionSystem.orderReceived$()
     .mergeMap(
         (transaction: Transaction)  => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
             .map(transaction => {
+                // If Delivered
                 console.log(JSON.stringify(transaction))
                 return transaction
             })
             .catch(transaction => {
+                // If Returned
                 console.log(JSON.stringify(transaction))
                 return Observable.empty()
             })

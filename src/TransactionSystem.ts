@@ -82,7 +82,7 @@ export class TransactionSystem {
 
     orderReceived$ = () =>
         new Observable<Transaction>((observer: Observer<Transaction>) => {
-                this.getCustomerAndOrderItems()
+            this.getCustomerAndOrderItems()
                 .subscribe(result => {
                     let transaction: Transaction = {
                         transactionId: uuid(),
@@ -121,7 +121,7 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "SHIPPED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(1,3)*24*60*60*1000)
+                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(1, 3) * 24 * 60 * 60 * 1000)
                 }
             }
             console.log(shippedTransaction.order.status)
@@ -136,7 +136,7 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "DELIVERED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2,7)*24*60*60*1000)
+                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
                 }
             }
             console.log(deliveredTransaction.order.status)
@@ -151,13 +151,14 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "CANCELLED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2,7)*24*60*60*1000)
+                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
                 }
             }
             console.log(cancelledTransaction.order.status)
+            observer.error(cancelledTransaction)
             observer.complete()
         })
-    
+
     orderReturned$ = (transaction: Transaction) =>
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let returnedTransaction: Transaction = {
@@ -165,10 +166,11 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "RETURNED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2,7)*24*60*60*1000)
+                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
                 }
             }
             console.log(returnedTransaction.order.status)
+            observer.error(returnedTransaction)
             observer.complete()
         })
 }

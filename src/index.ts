@@ -16,15 +16,17 @@ const transactionSystem = new TransactionSystem({
     startOrderNumber: 1,
     startSystemTime: new Date(1469532278 * 1000),
     totalCustomer: 10000,
-    totalProducts: 52010
+    totalProducts: 202852
 }, createConnection("mysql://root@localhost/ecomm"));
+
+const kafkaTopicName = "TutorialTopic";
 
 transactionSystem.orderReceived$()
     .mergeMap(
         (transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
-            .map(transaction => {
+            .map(trasaction => {
                 kafkaProducer.send(
-                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    [{messages: JSON.stringify(transaction), topic: kafkaTopicName}],
                     (err,data) => {
                         console.log(data)
                     }
@@ -36,7 +38,7 @@ transactionSystem.orderReceived$()
         (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
             .map(transaction => {
                 kafkaProducer.send(
-                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    [{messages: JSON.stringify(transaction), topic: kafkaTopicName}],
                     (err,data) => {
                         console.log(data)
                     }
@@ -45,7 +47,7 @@ transactionSystem.orderReceived$()
             })
             .catch(transaction => {
                 kafkaProducer.send(
-                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    [{messages: JSON.stringify(transaction), topic: kafkaTopicName}],
                     (err,data) => {
                         console.log(data)
                     }
@@ -57,7 +59,7 @@ transactionSystem.orderReceived$()
         (transaction: Transaction)  => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
             .map(transaction => {
                 kafkaProducer.send(
-                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    [{messages: JSON.stringify(transaction), topic: kafkaTopicName}],
                     (err,data) => {
                         console.log(data)
                     }
@@ -66,7 +68,7 @@ transactionSystem.orderReceived$()
             })
             .catch(transaction => {
                 kafkaProducer.send(
-                    [{messages: JSON.stringify(transaction), topic: "TutorialTopic"}],
+                    [{messages: JSON.stringify(transaction), topic: kafkaTopicName}],
                     (err,data) => {
                         console.log(data)
                     }

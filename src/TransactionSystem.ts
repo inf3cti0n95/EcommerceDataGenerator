@@ -46,7 +46,7 @@ export class TransactionSystem {
         return new RxSQL(this.DbConnection).query<ProductQueryResult[]>("SELECT * from products WHERE productId in " + listOfProducts)
             .flatMap(results => results)
             .map(result => {
-                let tempProduct = {
+                let tempProduct: Product = {
                     categories: JSON.parse(result.categories),
                     productPrice: result.price,
                     productId: result.productId,
@@ -95,7 +95,6 @@ export class TransactionSystem {
                             timestamp: this.getOrderDate()
                         }
                     }
-                    console.log(transaction.order.status)
                     observer.next(transaction)
                     observer.complete()
                 })
@@ -109,7 +108,7 @@ export class TransactionSystem {
                     status: "PROCESSED",
                 }
             }
-            console.log(processedTransaction.order.status)
+            // console.log(processedTransaction.order.status)
             observer.next(processedTransaction)
             observer.complete()
         })
@@ -124,7 +123,6 @@ export class TransactionSystem {
                     timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(1, 3) * 24 * 60 * 60 * 1000)
                 }
             }
-            console.log(shippedTransaction.order.status)
             observer.next(shippedTransaction)
             observer.complete()
         })
@@ -139,7 +137,6 @@ export class TransactionSystem {
                     timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
                 }
             }
-            console.log(deliveredTransaction.order.status)
             observer.next(deliveredTransaction)
             observer.complete()
         })
@@ -154,7 +151,6 @@ export class TransactionSystem {
                     timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
                 }
             }
-            console.log(cancelledTransaction.order.status)
             observer.error(cancelledTransaction)
             observer.complete()
         })

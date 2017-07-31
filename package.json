@@ -15,9 +15,11 @@
   },
   "dependencies": {
     "@types/chance": "^0.7.33",
+    "@types/dotenv": "^4.0.0",
     "@types/kafka-node": "^2.0.1",
     "@types/mysql": "^0.0.34",
     "chance": "^1.0.10",
+    "dotenv": "^4.0.0",
     "kafka-node": "^2.0.1",
     "rx-sql": "^0.0.3",
     "rxjs": "^5.4.2",

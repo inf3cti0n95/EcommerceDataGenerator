@@ -27,7 +27,7 @@ const kafkaTopicName = process.env.kafkaTopicName || "TutorialTopic";
 
 transactionSystem.orderReceived$()
     .mergeMap((transaction: Transaction) => {
-        return kafkaProducer$(kafkaProducer,transaction,kafkaTopicName).mapTo(transaction)
+        return kafkaProducer$(kafkaProducer, transaction, kafkaTopicName).mapTo(transaction)
     })
     .mergeMap(
     (transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
@@ -36,7 +36,6 @@ transactionSystem.orderReceived$()
     .mergeMap(
     (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
         .map(transaction => {
-            console.log(transaction.order.status)
             kafkaProducer.send(
                 [{ messages: JSON.stringify(transaction), topic: kafkaTopicName }],
                 (err, data) => {
@@ -80,7 +79,7 @@ transactionSystem.orderReceived$()
     .takeWhile(() => transactionSystem.lastOrderNumber < (process.env.numberOfTransaction || Infinity))
     .filter((transaction: Transaction) => transaction.order.amount !== 0)
     .subscribe(
-    (transaction: Transaction) => console.info(transactionSystem.currentSysTime),
+    (transaction: Transaction) => console.info(transaction.order.orderId, "FIN"),
     err => console.error(err),
     () => console.info("Complete")
     );

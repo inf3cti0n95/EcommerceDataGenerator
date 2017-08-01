@@ -1,5 +1,7 @@
 interface Transaction{
     transactionId: string,
     order: Order,
-    customer: Customer
+    customer: Customer,
+    timestamp: Date
+
 }

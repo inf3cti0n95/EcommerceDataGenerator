@@ -91,9 +91,10 @@ export class TransactionSystem {
                             orderItems: result.orderItems,
                             amount: result.orderItems.reduce((amount, orderItem) => amount + (orderItem.quantity * orderItem.product.productPrice), 0),
                             orderId: this.getOrderId(),
-                            status: "RECEIVED",
-                            timestamp: this.getOrderDate()
-                        }
+                            status: "RECEIVED"
+                        },
+                        timestamp: this.getOrderDate()
+
                     }
                     observer.next(transaction)
                     observer.complete()
@@ -108,7 +109,6 @@ export class TransactionSystem {
                     status: "PROCESSED",
                 }
             }
-            // console.log(processedTransaction.order.status)
             observer.next(processedTransaction)
             observer.complete()
         })
@@ -120,8 +120,9 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "SHIPPED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(1, 3) * 24 * 60 * 60 * 1000)
-                }
+                },
+                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(1, 3) * 24 * 60 * 60 * 1000)
+
             }
             observer.next(shippedTransaction)
             observer.complete()
@@ -134,8 +135,9 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "DELIVERED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
-                }
+                },
+                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+
             }
             observer.next(deliveredTransaction)
             observer.complete()
@@ -147,9 +149,10 @@ export class TransactionSystem {
                 ...transaction,
                 order: {
                     ...transaction.order,
-                    status: "CANCELLED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
-                }
+                    status: "CANCELLED"
+                },
+                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+
             }
             observer.error(cancelledTransaction)
             observer.complete()
@@ -162,10 +165,10 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "RETURNED",
-                    timestamp: new Date(new Date(transaction.order.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
-                }
+                },
+                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+
             }
-            console.log(returnedTransaction.order.status)
             observer.error(returnedTransaction)
             observer.complete()
         })

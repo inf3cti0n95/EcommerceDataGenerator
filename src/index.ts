@@ -21,8 +21,8 @@ const kafkaProducer = new Producer(kafkaClient);
 const transactionSystem = new TransactionSystem({
     startOrderNumber: 1,
     startSystemTime: startSystemTime,
-    totalCustomer: 10000,
-    totalProducts: 202852
+    totalCustomer: 9999,
+    totalProducts: 201900
 }, createConnection(DB_ADDRESS));
 
 const kafkaTopicName = process.env.kafkaTopicName || "TutorialTopic";

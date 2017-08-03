@@ -21,6 +21,8 @@
     "chance": "^1.0.10",
     "dotenv": "^4.0.0",
     "kafka-node": "^2.0.1",
+    "mongodb": "^2.2.30",
+    "rx-mongodb": "^1.0.0",
     "rx-sql": "^0.0.3",
     "rxjs": "^5.4.2",
     "tables": "^0.0.5",

@@ -85,7 +85,7 @@ export class TransactionSystem {
             this.getCustomerAndOrderItems()
                 .subscribe(result => {
                     let transaction: Transaction = {
-                        transactionId: uuid(),
+                        _id: uuid(),
                         customer: result.customer,
                         order: {
                             orderItems: result.orderItems,
@@ -104,6 +104,7 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let processedTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "PROCESSED",
@@ -117,6 +118,7 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let shippedTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "SHIPPED",
@@ -132,6 +134,7 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let deliveredTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "DELIVERED",
@@ -147,6 +150,7 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let cancelledTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "CANCELLED"
@@ -162,6 +166,7 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let returnedTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "RETURNED",

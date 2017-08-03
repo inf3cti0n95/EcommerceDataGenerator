@@ -9,6 +9,13 @@ import { kafkaProducer$ } from "./KafkaProducer";
 
 import { TransactionSystem } from "./TransactionSystem";
 
+const mongodb = require('mongodb');
+const RxMongodb = require("rx-mongodb");
+const rxMongodb = new RxMongodb(mongodb);
+const dbName = 'transact';
+const collectionName = 'transactions';
+const connectionString = 'mongodb://localhost:27017/' + dbName;
+
 config();
 
 const startSystemTime = new Date(process.env.startSystemTime || new Date(1501372800 * 1000).toDateString())
@@ -39,65 +46,40 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
 
         transactionSystem.orderReceived$()
             .filter((transaction: Transaction) => transaction.order.amount !== 0)
-            .mergeMap((transaction: Transaction) => {
-                return kafkaProducer$(kafkaProducer, transaction, kafkaTopicName).mapTo(transaction)
-            })
-            .mergeMap(
-            (transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
-                .mergeMap(transaction => kafkaProducer$(kafkaProducer, transaction, kafkaTopicName).mapTo(transaction))
+            .mergeMap((transaction: Transaction) => 
+                rxMongodb.connect(connectionString)
+                    .mergeMap((db: any) => rxMongodb.insert(collectionName,transaction))
+                    .mapTo(transaction)
+            )
+            .mergeMap((transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
+                .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction))
+                    .mapTo(transaction)
+               
             )
             .mergeMap(
             (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
-                .map(transaction => {
-                    kafkaProducer.send(
-                        [{ messages: JSON.stringify(transaction), topic: kafkaTopicName }],
-                        (err, data) => {
-                            console.log(data)
-                        }
-                    )
-                    return transaction
-                })
-                .catch(transaction => {
-                    kafkaProducer.send(
-                        [{ messages: JSON.stringify(transaction), topic: kafkaTopicName }],
-                        (err, data) => {
-                            console.log(data)
-                        }
-                    )
-                    return Observable.empty()
-                })
+                .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction).mapTo(transaction))
+                .catch((transaction: Transaction) => {rxMongodb.insert(collectionName,transaction).subscribe(); return Observable.empty()})
+                
+                    
+                    
             )
             .mergeMap(
             (transaction: Transaction) => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
-                .map(transaction => {
-                    kafkaProducer.send(
-                        [{ messages: JSON.stringify(transaction), topic: kafkaTopicName }],
-                        (err, data) => {
-                            console.log(data)
-                        }
-                    )
-                    return transaction
-                })
-                .catch(transaction => {
-                    kafkaProducer.send(
-                        [{ messages: JSON.stringify(transaction), topic: kafkaTopicName }],
-                        (err, data) => {
-                            console.log(data)
-                        }
-                    )
-                    return Observable.empty()
-                })
+               .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction).mapTo(transaction))
+                    
+                .catch((transaction: Transaction) => {rxMongodb.insert(collectionName,transaction).subscribe(); return Observable.empty()})
+                
             )
-            .repeatWhen(() => transactionSystem.currentSysTime.getTime() < Date.now() ? Observable.interval(500) : Observable.interval(5000))
+            .repeatWhen(() => Observable.interval(500))
             .takeWhile(() => transactionSystem.lastOrderNumber < (process.env.numberOfTransaction || Infinity))
-
             .subscribe(
-            (transaction: Transaction) => console.info(transaction.order.orderId, "FIN"),
+            (transaction: any) => console.info("FIN"),
             err => console.error(err),
             () => console.info("Complete")
             );
     },
-        (err) => console.error(err),
-        () => ("System Finish")
+    (err) => console.error(err),
+    () => ("System Finish")
 
     )

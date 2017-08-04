@@ -90,11 +90,10 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
             )
             .repeatWhen(() => transactionSystem.currentSysTime.getTime() < Date.now() ? Observable.interval(500) : Observable.interval(5000))
             .takeWhile(() => transactionSystem.lastOrderNumber < (process.env.numberOfTransaction || Infinity))
-
             .subscribe(
-            (transaction: Transaction) => console.info(transaction.order.orderId, "FIN"),
-            err => console.error(err),
-            () => console.info("Complete")
+                (transaction: Transaction) => console.info(transaction.order.orderId, "FIN"),
+                err => console.error(err),
+                () => console.info("Complete")
             );
     },
         (err) => console.error(err),

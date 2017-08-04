@@ -93,7 +93,7 @@ export class TransactionSystem {
                             orderId: this.getOrderId(),
                             status: "RECEIVED"
                         },
-                        timestamp: this.getOrderDate()
+                        timestamp: new Date(Date.now())
 
                     }
                     observer.next(transaction)
@@ -109,7 +109,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "PROCESSED",
                 },
-                timestamp: generateRandomDate(transaction.timestamp,0,1)
+                timestamp: new Date(Date.now())
             }
             observer.next(processedTransaction)
             observer.complete()
@@ -124,7 +124,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "SHIPPED",
                 },
-                timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
+                timestamp: new Date(Date.now())
 
             }
             observer.next(shippedTransaction)
@@ -140,7 +140,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "DELIVERED",
                 },
-                timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
+                timestamp: new Date(Date.now())
 
             }
             observer.next(deliveredTransaction)
@@ -156,7 +156,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "CANCELLED"
                 },
-                timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
+                timestamp: new Date(Date.now())
 
             }
             observer.error(cancelledTransaction)
@@ -172,7 +172,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "RETURNED",
                 },
-                timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
+                timestamp: new Date(Date.now())
 
             }
             observer.error(returnedTransaction)

@@ -1,5 +1,6 @@
 interface Transaction{
-    transactionId: string,
+    _id: string,
     order: Order,
-    customer: Customer
+    customer: Customer,
+    timestamp: Date
 }

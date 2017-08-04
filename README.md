@@ -21,11 +21,11 @@ npm start
 
 ```
 
-DBAddress="mysql://root@localhost/ecomm"  //Link to Mysql db where customer and products data is stored
+DBAddress=mysql://root@localhost/ecomm  //Link to Mysql db where customer and products data is stored
 startSystemTime=12345678 //Unix timestamp to start system from
-mongoDatabaseName="transact" // name of the mongodatabase
-mongoCollectionName="transactions" // name of the collection to store to
-mongoDBConnectionString="mongodb://localhost:27017/" // mongodb connection string 
+mongoDatabaseName=transact // name of the mongodatabase
+mongoCollectionName=transactions // name of the collection to store to
+mongoDBConnectionString=mongodb://localhost:27017/ // mongodb connection string 
 
 
 ```

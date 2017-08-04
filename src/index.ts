@@ -50,7 +50,7 @@ transactionSystem.orderReceived$()
     .repeatWhen(() => Observable.interval(2000))
     // .takeWhile(() => transactionSystem.lastOrderNumber < 5)
     .subscribe(
-        (transaction: Transaction) => console.log(transaction.order.status, transaction.order.orderId, transaction.order.timestamp),
+        (transaction: Transaction) => console.log(transaction.order.status, transaction.order.orderId, transaction.timestamp),
         err => console.error(err),
         () => console.info("complete")
     );

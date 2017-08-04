@@ -1,4 +1,4 @@
-import { generateRandomInt } from "./utils";
+import { generateRandomInt, generateRandomDate } from "./utils";
 import { Observable, Observer } from "rxjs";
 import { v1 as uuid } from "uuid";
 import { RxSQL } from "rx-sql";
@@ -85,7 +85,7 @@ export class TransactionSystem {
             this.getCustomerAndOrderItems()
                 .subscribe(result => {
                     let transaction: Transaction = {
-                        transactionId: uuid(),
+                        _id: uuid(),
                         customer: result.customer,
                         order: {
                             orderItems: result.orderItems,
@@ -104,6 +104,7 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let processedTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "PROCESSED",
@@ -117,11 +118,12 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let shippedTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "SHIPPED",
                 },
-                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(1, 3) * 24 * 60 * 60 * 1000)
+                timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
 
             }
             observer.next(shippedTransaction)
@@ -132,11 +134,12 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let deliveredTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "DELIVERED",
                 },
-                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+                timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
 
             }
             observer.next(deliveredTransaction)
@@ -147,11 +150,12 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let cancelledTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "CANCELLED"
                 },
-                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+                timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
 
             }
             observer.error(cancelledTransaction)
@@ -162,11 +166,12 @@ export class TransactionSystem {
         new Observable<Transaction>((observer: Observer<Transaction>) => {
             let returnedTransaction: Transaction = {
                 ...transaction,
+                _id: uuid(),
                 order: {
                     ...transaction.order,
                     status: "RETURNED",
                 },
-                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+                timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
 
             }
             observer.error(returnedTransaction)

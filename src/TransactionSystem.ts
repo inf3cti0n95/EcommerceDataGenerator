@@ -1,4 +1,4 @@
-import { generateRandomInt } from "./utils";
+import { generateRandomInt, generateRandomDate } from "./utils";
 import { Observable, Observer } from "rxjs";
 import { v1 as uuid } from "uuid";
 import { RxSQL } from "rx-sql";
@@ -123,7 +123,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "SHIPPED",
                 },
-                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(1, 3) * 24 * 60 * 60 * 1000)
+                timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
 
             }
             observer.next(shippedTransaction)
@@ -139,7 +139,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "DELIVERED",
                 },
-                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+                timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
 
             }
             observer.next(deliveredTransaction)
@@ -155,7 +155,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "CANCELLED"
                 },
-                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+                timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
 
             }
             observer.error(cancelledTransaction)
@@ -171,7 +171,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "RETURNED",
                 },
-                timestamp: new Date(new Date(transaction.timestamp).getTime() + generateRandomInt(2, 7) * 24 * 60 * 60 * 1000)
+                timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
 
             }
             observer.error(returnedTransaction)

@@ -18,3 +18,5 @@ npm start
 ```
 
 ### Kafka Producer to Stream Transactions on [kafka branch](https://github.com/inf3cti0n95/EcommerceDataGenerator/tree/kafka)
+
+### MongoDB to Store Transactions on [mongo branch](https://github.com/inf3cti0n95/EcommerceDataGenerator/tree/mongo)

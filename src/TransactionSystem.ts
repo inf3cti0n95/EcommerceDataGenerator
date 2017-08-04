@@ -108,7 +108,8 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "PROCESSED",
-                }
+                },
+                timestamp: generateRandomDate(transaction.timestamp,0,1)
             }
             observer.next(processedTransaction)
             observer.complete()
@@ -172,7 +173,6 @@ export class TransactionSystem {
                     status: "RETURNED",
                 },
                 timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
-
             }
             observer.error(returnedTransaction)
             observer.complete()

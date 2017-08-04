@@ -108,7 +108,8 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "PROCESSED",
-                }
+                },
+                timestamp: generateRandomDate(transaction.timestamp,0,1)
             }
             observer.next(processedTransaction)
             observer.complete()

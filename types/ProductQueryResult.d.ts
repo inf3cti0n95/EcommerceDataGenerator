@@ -1,6 +1,6 @@
 interface ProductQueryResult {
     productId: string,
-    name: string,
+    title: string,
     price: number,
     categories: string
 }

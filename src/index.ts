@@ -9,14 +9,19 @@ import { kafkaProducer$ } from "./KafkaProducer";
 
 import { TransactionSystem } from "./TransactionSystem";
 
+config();
+
 const mongodb = require('mongodb');
 const RxMongodb = require("rx-mongodb");
 const rxMongodb = new RxMongodb(mongodb);
-const dbName = 'transact';
-const collectionName = 'transactions';
-const connectionString = 'mongodb://localhost:27017/' + dbName;
+const dbName = process.env.mongoDatabaseName || 'transact';
+const collectionName = process.env.mongoCollectionName  || 'transactions';
 
-config();
+const connectionString = (process.env.mongoDBConnectionString || 'mongodb://localhost:27017/') + dbName;
+console.log(dbName,collectionName,connectionString)
+
+
+
 
 const startSystemTime = new Date(process.env.startSystemTime || new Date(1501372800 * 1000).toDateString())
 const SERVER_ADDRESS = process.env.kafkaServerAddress || "localhost:2181";

@@ -16,20 +16,36 @@ const RxMongodb = require("rx-mongodb");
 const rxMongodb = new RxMongodb(mongodb);
 const dbName = process.env.mongoDatabaseName || 'transact';
 const collectionName = process.env.mongoCollectionName  || 'transactions';
+let endTime:any;
+let startTime: any;
+if(process.env.endTime !== undefined)
+    endTime = process.env.endTime;
+
+if(process.env.startSystemTime !== undefined)
+    startTime = process.env.startSystemTime;
+else 
+    startTime = 1501372800;
+
+endTime = eval(endTime)*1000;
+startTime = eval(startTime) *1000;
 
 const connectionString = (process.env.mongoDBConnectionString || 'mongodb://localhost:27017/') + dbName;
-console.log(dbName,collectionName,connectionString)
 
 
-
-
-const startSystemTime = new Date(process.env.startSystemTime || new Date(1501372800 * 1000).toDateString())
+const startSystemTime = new Date(startTime)
 const SERVER_ADDRESS = process.env.kafkaServerAddress || "localhost:2181";
 const DB_ADDRESS = process.env.DBAddress || "mysql://root@localhost/ecomm";
 const connection = createConnection(DB_ADDRESS);
 
 const kafkaClient = new Client(SERVER_ADDRESS)
 const kafkaProducer = new Producer(kafkaClient);
+
+console.log("mySQL Database Address -",DB_ADDRESS)
+console.log("Mongo Database Name -",dbName);
+console.log("Mongo Collection Name -",collectionName);
+console.log("Mongo Connection String -",connectionString);
+console.log("System End Time", new Date(endTime));
+console.log("System Start Time", new Date(startTime));
 
 new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from products")
     .mergeMap(noOfProducts => new RxSQL(connection).query<[any]>("SELECT count(1) as noOfCustomers  from customers")
@@ -39,7 +55,7 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
     )
     .subscribe(
     (result) => {
-        console.log(result)
+        console.log("Total Products and Customers in DB",result)
         const transactionSystem = new TransactionSystem({
             startOrderNumber: 1,
             startSystemTime: startSystemTime,
@@ -77,9 +93,13 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
                 
             )
             .repeatWhen(() => Observable.interval(500))
-            .takeWhile(() => transactionSystem.lastOrderNumber < (process.env.numberOfTransaction || Infinity))
+            .do(() => {
+                console.log("Last Order Number -",transactionSystem.lastOrderNumber);
+                console.log("Current Time -",transactionSystem.currentSysTime.getTime(),"End Time -",endTime)
+            })
+            .takeWhile(() => typeof process.env.endTime !== "undefined" ? transactionSystem.currentSysTime.getTime() < endTime : true)
             .subscribe(
-            (transaction: any) => console.info("FIN"),
+            (transaction: any) => {},
             err => console.error(err),
             () => console.info("Complete")
             );

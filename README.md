@@ -22,11 +22,13 @@ npm start
 ```
 
 DBAddress=mysql://root@localhost/ecomm  //Link to Mysql db where customer and products data is stored
-startSystemTime=12345678 //Unix timestamp to start system from
+startTime=12345678 //Unix timestamp to start system from
+endTime=123556 //Unix timestamp to end system
 mongoDatabaseName=transact // name of the mongodatabase
 mongoCollectionName=transactions // name of the collection to store to
 mongoDBConnectionString=mongodb://localhost:27017/ // mongodb connection string 
-
+initialOrderNumber=100 //Initial Order Number to start from
+speed=10 // Speed to to generate transactions in ms
 
 ```
 

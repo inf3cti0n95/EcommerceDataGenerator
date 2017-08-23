@@ -3,10 +3,7 @@ import { createConnection } from "mysql";
 import { Observable } from "rxjs";
 import { generateRandomInt } from "./utils";
 import { Chance } from "chance";
-import { Client, Producer } from "kafka-node";
 import { config } from "dotenv";
-import { kafkaProducer$ } from "./KafkaProducer";
-
 import { TransactionSystem } from "./TransactionSystem";
 
 config();
@@ -16,41 +13,19 @@ const RxMongodb = require("rx-mongodb");
 const rxMongodb = new RxMongodb(mongodb);
 const dbName = process.env.mongoDatabaseName || 'transact';
 const collectionName = process.env.mongoCollectionName || 'transactions';
-let endTime: any;
-let startTime: any;
-let hasEndtime = false;
-let orderCyclePerSec: any = process.env.speed || 100;
+const connectionString = (process.env.mongoDBConnectionString || 'mongodb://localhost:27017/') + dbName;
+const DB_ADDRESS = process.env.DBAddress || "mysql://root@localhost/ecomm";
+const connection = createConnection(DB_ADDRESS);
+const hasEndtime = process.env.endTime !== undefined;
+const orderCyclePerSec: any = process.env.speed || 100;
+const startOrderNumber: any = process.env.initialOrderNumber || 1;
 
-if (process.env.endTime !== undefined) {
-    endTime = process.env.endTime;
-    hasEndtime = true;
-}
-else
-    hasEndtime = false;
-let startOrderNumber: any;
-
-if (process.env.initialOrderNumber !== undefined)
-    startOrderNumber = process.env.initialOrderNumber;
-else
-    startOrderNumber = 1;
-
-if (process.env.startTime !== undefined)
-    startTime = process.env.startTime;
-else
-    startTime = 1501372800;
+let endTime: any = process.env.endTime || Infinity;
+let startTime: any = process.env.startTime || 1501372800;
+const startSystemTime = new Date(startTime)
 
 endTime = eval(endTime) * 1000;
 startTime = eval(startTime) * 1000;
-
-const connectionString = (process.env.mongoDBConnectionString || 'mongodb://localhost:27017/') + dbName;
-
-
-const startSystemTime = new Date(startTime)
-const SERVER_ADDRESS = process.env.kafkaServerAddress || "localhost:2181";
-const DB_ADDRESS = process.env.DBAddress || "mysql://root@localhost/ecomm";
-const connection = createConnection(DB_ADDRESS);
-const kafkaClient = new Client(SERVER_ADDRESS)
-const kafkaProducer = new Producer(kafkaClient);
 
 console.log("mySQL Database Address -", DB_ADDRESS)
 console.log("Mongo Database Name -", dbName);
@@ -76,8 +51,6 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
             totalCustomer: result.noOfCustomers,
             totalProducts: result.noOfProducts
         }, connection);
-
-        const kafkaTopicName = process.env.kafkaTopicName || "TutorialTopic";
 
         transactionSystem.orderReceived$()
             .filter((transaction: Transaction) => transaction.order.amount !== 0)

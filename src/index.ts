@@ -92,7 +92,7 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
                 .catch((transaction: Transaction) => {rxMongodb.insert(collectionName,transaction).subscribe(); return Observable.empty()})
                 
             )
-            .repeatWhen(() => Observable.interval(500))
+            .repeatWhen(() => Observable.interval(100))
             .do(() => {
                 console.log("Last Order Number -",transactionSystem.lastOrderNumber);
                 console.log("Current Time -",transactionSystem.currentSysTime.getTime(),"End Time -",endTime)

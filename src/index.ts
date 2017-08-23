@@ -22,10 +22,10 @@ const startOrderNumber: any = process.env.initialOrderNumber || 1;
 
 let endTime: any = process.env.endTime || Infinity;
 let startTime: any = process.env.startTime || 1501372800;
-const startSystemTime = new Date(startTime)
 
 endTime = eval(endTime) * 1000;
 startTime = eval(startTime) * 1000;
+const startSystemTime = new Date(startTime)
 
 console.log("mySQL Database Address -", DB_ADDRESS)
 console.log("Mongo Database Name -", dbName);
@@ -65,20 +65,28 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
 
             )
             .mergeMap(
-            (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
+            (transaction: Transaction) => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
                 .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName, transaction).mapTo(transaction))
-                .catch((transaction: Transaction) => { rxMongodb.insert(collectionName, transaction).subscribe(); return Observable.empty() })
+                .catch((transaction: Transaction) => { 
+                    rxMongodb.insert(collectionName, transaction).subscribe();
+                    console.log("Last Order Number -", transactionSystem.lastOrderNumber, "Order Status -", transaction.order.status);
+                    console.log("Current Time -", transactionSystem.currentSysTime.getTime(), "End Time -", endTime)
+                    return Observable.empty() })
+                
             )
             .mergeMap(
-            (transaction: Transaction) => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
+            (transaction: Transaction) => (Chance().bool({ likelihood: 10 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
                 .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName, transaction).mapTo(transaction))
-
-                .catch((transaction: Transaction) => { rxMongodb.insert(collectionName, transaction).subscribe(); return Observable.empty() })
-
+                .catch((transaction: Transaction) => {
+                    rxMongodb.insert(collectionName, transaction).subscribe();
+                    console.log("Last Order Number -", transactionSystem.lastOrderNumber, "Order Status -", transaction.order.status);
+                    console.log("Current Time -", transactionSystem.currentSysTime.getTime(), "End Time -", endTime)
+                    return Observable.empty()
+                })
             )
             .repeatWhen(() => Observable.interval(orderCyclePerSec))
-            .do(() => {
-                console.log("Last Order Number -", transactionSystem.lastOrderNumber);
+            .do((transaction: Transaction) => {
+                console.log("Last Order Number -", transactionSystem.lastOrderNumber, "Order Status -", transaction.order.status);
                 console.log("Current Time -", transactionSystem.currentSysTime.getTime(), "End Time -", endTime)
             })
             .takeWhile(() => hasEndtime ? transactionSystem.currentSysTime.getTime() < endTime : true)

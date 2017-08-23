@@ -15,24 +15,32 @@ const mongodb = require('mongodb');
 const RxMongodb = require("rx-mongodb");
 const rxMongodb = new RxMongodb(mongodb);
 const dbName = process.env.mongoDatabaseName || 'transact';
-const collectionName = process.env.mongoCollectionName  || 'transactions';
-let endTime:any;
+const collectionName = process.env.mongoCollectionName || 'transactions';
+let endTime: any;
 let startTime: any;
 let hasEndtime = false;
-if(process.env.endTime !== undefined){
+let orderCyclePerSec: any = process.env.speed || 100;
+
+if (process.env.endTime !== undefined) {
     endTime = process.env.endTime;
     hasEndtime = true;
 }
 else
     hasEndtime = false;
+let startOrderNumber: any;
 
-if(process.env.startSystemTime !== undefined)
-    startTime = process.env.startSystemTime;
-else 
+if (process.env.initialOrderNumber !== undefined)
+    startOrderNumber = process.env.initialOrderNumber;
+else
+    startOrderNumber = 1;
+
+if (process.env.startTime !== undefined)
+    startTime = process.env.startTime;
+else
     startTime = 1501372800;
 
-endTime = eval(endTime)*1000;
-startTime = eval(startTime) *1000;
+endTime = eval(endTime) * 1000;
+startTime = eval(startTime) * 1000;
 
 const connectionString = (process.env.mongoDBConnectionString || 'mongodb://localhost:27017/') + dbName;
 
@@ -41,16 +49,17 @@ const startSystemTime = new Date(startTime)
 const SERVER_ADDRESS = process.env.kafkaServerAddress || "localhost:2181";
 const DB_ADDRESS = process.env.DBAddress || "mysql://root@localhost/ecomm";
 const connection = createConnection(DB_ADDRESS);
-
 const kafkaClient = new Client(SERVER_ADDRESS)
 const kafkaProducer = new Producer(kafkaClient);
 
-console.log("mySQL Database Address -",DB_ADDRESS)
-console.log("Mongo Database Name -",dbName);
-console.log("Mongo Collection Name -",collectionName);
-console.log("Mongo Connection String -",connectionString);
+console.log("mySQL Database Address -", DB_ADDRESS)
+console.log("Mongo Database Name -", dbName);
+console.log("Mongo Collection Name -", collectionName);
+console.log("Mongo Connection String -", connectionString);
 console.log("System End Time", new Date(endTime));
 console.log("System Start Time", new Date(startTime));
+console.log("Start Order Number", startOrderNumber);
+console.log("Order Speed", orderCyclePerSec)
 
 new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from products")
     .mergeMap(noOfProducts => new RxSQL(connection).query<[any]>("SELECT count(1) as noOfCustomers  from customers")
@@ -60,9 +69,9 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
     )
     .subscribe(
     (result) => {
-        console.log("Total Products and Customers in DB",result)
+        console.log("Total Products and Customers in DB", result)
         const transactionSystem = new TransactionSystem({
-            startOrderNumber: 1,
+            startOrderNumber: eval(startOrderNumber),
             startSystemTime: startSystemTime,
             totalCustomer: result.noOfCustomers,
             totalProducts: result.noOfProducts
@@ -72,50 +81,36 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
 
         transactionSystem.orderReceived$()
             .filter((transaction: Transaction) => transaction.order.amount !== 0)
-            .mergeMap((transaction: Transaction) => 
+            .mergeMap((transaction: Transaction) =>
                 rxMongodb.connect(connectionString)
-                    .mergeMap((db: any) => rxMongodb.insert(collectionName,transaction))
+                    .mergeMap((db: any) => rxMongodb.insert(collectionName, transaction))
                     .mapTo(transaction)
             )
-            .do((t:Transaction) => console.log(t.order.status))
             .mergeMap((transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
-                .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction))
-                    .mapTo(transaction)
-               
+                .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName, transaction))
+                .mapTo(transaction)
+
             )
-            .do((t:Transaction) => console.log(t.order.status))
-            
             .mergeMap(
             (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
-                .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction).mapTo(transaction))
-                .catch((transaction: Transaction) => {rxMongodb.insert(collectionName,transaction).subscribe(); return Observable.empty()})
-                
-                    
-                    
+                .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName, transaction).mapTo(transaction))
+                .catch((transaction: Transaction) => { rxMongodb.insert(collectionName, transaction).subscribe(); return Observable.empty() })
             )
-            .do((t:Transaction) => console.log(t.order.status))
-            
             .mergeMap(
             (transaction: Transaction) => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
-               .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction).mapTo(transaction))
-                    
-                .catch((transaction: Transaction) => {rxMongodb.insert(collectionName,transaction).subscribe(); return Observable.empty()})
-                
+                .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName, transaction).mapTo(transaction))
+
+                .catch((transaction: Transaction) => { rxMongodb.insert(collectionName, transaction).subscribe(); return Observable.empty() })
+
             )
-            .do((t:Transaction) => console.log(t.order.status))
-            
-            .repeatWhen(() => Observable.interval(1))
+            .repeatWhen(() => Observable.interval(orderCyclePerSec))
             .do(() => {
-                console.log("Last Order Number -",transactionSystem.lastOrderNumber);
-                console.log("Current Time -",transactionSystem.currentSysTime.getTime(),"End Time -",endTime)
+                console.log("Last Order Number -", transactionSystem.lastOrderNumber);
+                console.log("Current Time -", transactionSystem.currentSysTime.getTime(), "End Time -", endTime)
             })
             .takeWhile(() => hasEndtime ? transactionSystem.currentSysTime.getTime() < endTime : true)
-            .catch(err => {
-                console.log("err", err);
-                return Observable.empty()}
-            )
             .subscribe(
-            (transaction: any) => {},
+            (transaction: any) => { },
             err => console.error(err),
             () => console.info("Complete")
             );

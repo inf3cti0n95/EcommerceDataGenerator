@@ -13,7 +13,7 @@ export class TransactionSystem {
     constructor(systemConfig: ITransactionSystemConfig, DbConnection: IConnection) {
         this.systemConfig = systemConfig;
         this.currentSysTime = this.systemConfig.startSystemTime;
-        this.lastOrderNumber = 0;
+        this.lastOrderNumber = this.systemConfig.startOrderNumber;
         this.DbConnection = DbConnection;
     }
     private getOrderDate = () => {

@@ -18,8 +18,13 @@ const dbName = process.env.mongoDatabaseName || 'transact';
 const collectionName = process.env.mongoCollectionName  || 'transactions';
 let endTime:any;
 let startTime: any;
-if(process.env.endTime !== undefined)
+let hasEndtime = false;
+if(process.env.endTime !== undefined){
     endTime = process.env.endTime;
+    hasEndtime = true;
+}
+else
+    hasEndtime = false;
 
 if(process.env.startSystemTime !== undefined)
     startTime = process.env.startSystemTime;
@@ -72,11 +77,14 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
                     .mergeMap((db: any) => rxMongodb.insert(collectionName,transaction))
                     .mapTo(transaction)
             )
+            .do((t:Transaction) => console.log(t.order.status))
             .mergeMap((transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
                 .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction))
                     .mapTo(transaction)
                
             )
+            .do((t:Transaction) => console.log(t.order.status))
+            
             .mergeMap(
             (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
                 .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction).mapTo(transaction))
@@ -85,6 +93,8 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
                     
                     
             )
+            .do((t:Transaction) => console.log(t.order.status))
+            
             .mergeMap(
             (transaction: Transaction) => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
                .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName,transaction).mapTo(transaction))
@@ -92,12 +102,18 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
                 .catch((transaction: Transaction) => {rxMongodb.insert(collectionName,transaction).subscribe(); return Observable.empty()})
                 
             )
-            .repeatWhen(() => Observable.interval(100))
+            .do((t:Transaction) => console.log(t.order.status))
+            
+            .repeatWhen(() => Observable.interval(1))
             .do(() => {
                 console.log("Last Order Number -",transactionSystem.lastOrderNumber);
                 console.log("Current Time -",transactionSystem.currentSysTime.getTime(),"End Time -",endTime)
             })
-            .takeWhile(() => typeof process.env.endTime !== "undefined" ? transactionSystem.currentSysTime.getTime() < endTime : true)
+            .takeWhile(() => hasEndtime ? transactionSystem.currentSysTime.getTime() < endTime : true)
+            .catch(err => {
+                console.log("err", err);
+                return Observable.empty()}
+            )
             .subscribe(
             (transaction: any) => {},
             err => console.error(err),
@@ -106,5 +122,4 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
     },
     (err) => console.error(err),
     () => ("System Finish")
-
     )

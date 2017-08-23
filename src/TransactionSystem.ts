@@ -38,7 +38,7 @@ export class TransactionSystem {
                 }
                 return tempCustomer
             })
-            .first()
+            .take(1)
     }
 
     private getProducts = () => {

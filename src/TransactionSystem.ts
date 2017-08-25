@@ -18,7 +18,7 @@ export class TransactionSystem {
     }
     private getOrderDate = () => {
         if (this.currentSysTime.getTime() < Date.now())
-            this.currentSysTime = new Date(this.currentSysTime.getTime() + generateRandomInt(500, 5000))
+            this.currentSysTime = new Date(this.currentSysTime.getTime() + ( generateRandomInt(60000, 300000)))
         else
             this.currentSysTime = new Date(Date.now())
         return this.currentSysTime;

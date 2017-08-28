@@ -9,6 +9,7 @@
     "start": "tsc && node lib/index.js"
   },
   "devDependencies": {
+    "@types/moment": "^2.13.0",
     "@types/node": "^8.0.16",
     "@types/uuid": "^3.4.0",
     "typescript": "^2.4.2"
@@ -21,6 +22,7 @@
     "chance": "^1.0.10",
     "dotenv": "^4.0.0",
     "kafka-node": "^2.0.1",
+    "moment": "^2.18.1",
     "mongodb": "^2.2.30",
     "rx-mongodb": "^1.0.0",
     "rx-sql": "^0.0.3",

@@ -5,6 +5,7 @@ import { generateRandomInt } from "./utils";
 import { Chance } from "chance";
 import { config } from "dotenv";
 import { TransactionSystem } from "./TransactionSystem";
+import * as moment from 'moment';
 
 config();
 

@@ -3,6 +3,7 @@ import { Observable, Observer } from "rxjs";
 import { v1 as uuid } from "uuid";
 import { RxSQL } from "rx-sql";
 import { IConnection, format } from "mysql";
+import * as moment from "moment";
 
 
 export class TransactionSystem {
@@ -17,8 +18,13 @@ export class TransactionSystem {
         this.DbConnection = DbConnection;
     }
     private getOrderDate = () => {
+        let dayFactor = eval(moment(this.currentSysTime).format("DDD"))
+
+        if(moment(this.currentSysTime).format("YY") === "17")
+            dayFactor += 366
+        
         if (this.currentSysTime.getTime() < Date.now())
-            this.currentSysTime = new Date(this.currentSysTime.getTime() + ( generateRandomInt(60000, 300000)))
+            this.currentSysTime = new Date(this.currentSysTime.getTime() + (generateRandomInt(60000, 300000)/dayFactor))
         else
             this.currentSysTime = new Date(Date.now())
         return this.currentSysTime;
@@ -26,7 +32,7 @@ export class TransactionSystem {
 
     private getOrderId = () => {
         this.lastOrderNumber = this.lastOrderNumber + 1;
-        return "ORDER" + this.lastOrderNumber
+        return this.lastOrderNumber
     }
 
     private getCustomer = () => {
@@ -157,7 +163,6 @@ export class TransactionSystem {
                     status: "CANCELLED"
                 },
                 timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
-
             }
             observer.error(cancelledTransaction)
             observer.complete()

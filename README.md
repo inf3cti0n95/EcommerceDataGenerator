@@ -11,10 +11,21 @@ sudo npm install -g typescript
 npm install
 ```
 
-## Run
+## Run on CLI
+
+Transactions are printed on the console
 
 ```
 npm start
+
+```
+
+
+## Save to MongoDB
+
+```
+npm mongo
+
 ```
 
 ## env Config File
@@ -31,6 +42,5 @@ initialOrderNumber=100 //Initial Order Number to start from
 speed=10 // Speed to to generate transactions in ms
 
 ```
-
 
 ### Kafka Producer to Stream Transactions on [kafka branch](https://github.com/inf3cti0n95/EcommerceDataGenerator/tree/kafka)

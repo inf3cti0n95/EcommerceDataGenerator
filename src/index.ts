@@ -66,17 +66,17 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
 
         transactionSystem.orderReceived$()
             .filter((transaction: Transaction) => transaction.order.amount !== 0)
-            .mergeMap((transaction: Transaction) =>
+            .mergeMap<Transaction, Transaction>((transaction: Transaction) =>
                 rxMongodb.connect(connectionString)
                     .mergeMap((db: any) => rxMongodb.insert(collectionName, transaction))
                     .mapTo(transaction)
             )
-            .mergeMap((transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
+            .mergeMap<Transaction, Transaction>((transaction: Transaction) => transactionSystem.orderProcessed$(transaction)
                 .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName, transaction))
                 .mapTo(transaction)
 
             )
-            .mergeMap(
+            .mergeMap<Transaction, Transaction>(
             (transaction: Transaction) => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
                 .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName, transaction).mapTo(transaction))
                 .catch((transaction: Transaction) => { 
@@ -86,7 +86,7 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
                     return Observable.empty() })
                 
             )
-            .mergeMap(
+            .mergeMap<Transaction, Transaction>(
             (transaction: Transaction) => (Chance().bool({ likelihood: 10 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
                 .mergeMap((transaction: Transaction) => rxMongodb.insert(collectionName, transaction).mapTo(transaction))
                 .catch((transaction: Transaction) => {

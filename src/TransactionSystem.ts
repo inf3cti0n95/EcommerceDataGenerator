@@ -3,7 +3,7 @@ import { Observable, Observer } from "rxjs";
 import { v1 as uuid } from "uuid";
 import { RxSQL } from "rx-sql";
 import { IConnection, format } from "mysql";
-
+import * as moment from "moment";
 
 export class TransactionSystem {
     public lastOrderNumber: number
@@ -13,12 +13,14 @@ export class TransactionSystem {
     constructor(systemConfig: ITransactionSystemConfig, DbConnection: IConnection) {
         this.systemConfig = systemConfig;
         this.currentSysTime = this.systemConfig.startSystemTime;
-        this.lastOrderNumber = 0;
+        this.lastOrderNumber = this.systemConfig.startOrderNumber;
         this.DbConnection = DbConnection;
     }
     private getOrderDate = () => {
+        let dayFactor = parseInt(moment(this.currentSysTime).format("DDD"), 10)
+        dayFactor += 366 * parseInt(moment(this.currentSysTime).format("YY"), 10) - parseInt(moment(this.systemConfig.startSystemTime).format("YY"), 10)
         if (this.currentSysTime.getTime() < Date.now())
-            this.currentSysTime = new Date(this.currentSysTime.getTime() + generateRandomInt(500, 5000))
+            this.currentSysTime = new Date(this.currentSysTime.getTime() + (generateRandomInt(60000, 300000) * 100 / dayFactor))
         else
             this.currentSysTime = new Date(Date.now())
         return this.currentSysTime;
@@ -26,7 +28,7 @@ export class TransactionSystem {
 
     private getOrderId = () => {
         this.lastOrderNumber = this.lastOrderNumber + 1;
-        return "ORDER" + this.lastOrderNumber
+        return this.lastOrderNumber
     }
 
     private getCustomer = () => {
@@ -38,7 +40,7 @@ export class TransactionSystem {
                 }
                 return tempCustomer
             })
-            .first()
+            .take(1)
     }
 
     private getProducts = () => {
@@ -108,7 +110,8 @@ export class TransactionSystem {
                 order: {
                     ...transaction.order,
                     status: "PROCESSED",
-                }
+                },
+                timestamp: generateRandomDate(transaction.timestamp, 0, 1)
             }
             observer.next(processedTransaction)
             observer.complete()
@@ -123,7 +126,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "SHIPPED",
                 },
-                timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
+                timestamp: generateRandomDate(new Date(transaction.timestamp), 1, 3)
 
             }
             observer.next(shippedTransaction)
@@ -139,7 +142,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "DELIVERED",
                 },
-                timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
+                timestamp: generateRandomDate(new Date(transaction.timestamp), 2, 7)
 
             }
             observer.next(deliveredTransaction)
@@ -155,8 +158,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "CANCELLED"
                 },
-                timestamp: generateRandomDate(new Date(transaction.timestamp),1,3)
-
+                timestamp: generateRandomDate(new Date(transaction.timestamp), 1, 3)
             }
             observer.error(cancelledTransaction)
             observer.complete()
@@ -171,8 +173,7 @@ export class TransactionSystem {
                     ...transaction.order,
                     status: "RETURNED",
                 },
-                timestamp: generateRandomDate(new Date(transaction.timestamp),2,7)
-
+                timestamp: generateRandomDate(new Date(transaction.timestamp), 2, 7)
             }
             observer.error(returnedTransaction)
             observer.complete()

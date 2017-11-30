@@ -3,15 +3,44 @@ import { createConnection } from "mysql";
 import { Observable } from "rxjs";
 import { generateRandomInt } from "./utils";
 import { Chance } from "chance";
-
 import { TransactionSystem } from "./TransactionSystem";
+import { existsSync } from "fs";
+import { config } from "dotenv";
 
-const transactionSystem = new TransactionSystem({
-    startOrderNumber: 1,
-    startSystemTime: new Date(1469532278 * 1000),
-    totalCustomer: 10000,
-    totalProducts: 52010
-}, createConnection("mysql://root:123456@localhost/ecomm"));
+let envFilePath = ".env";
+
+if(existsSync(".env.production"))
+    envFilePath = ".env.production"
+
+if(existsSync(".env.local"))
+    envFilePath = ".env.local"
+
+config({
+    path: envFilePath
+})
+
+
+const startOrderNumber: any = process.env.initialOrderNumber || 1;
+let startTime: any = process.env.startTime || Date.now()/1000;
+const startSystemTime = new Date(startTime * 1000)
+const DB_ADDRESS = process.env.DBAddress || "mysql://root@localhost/ecomm";
+const connection = createConnection(DB_ADDRESS);
+
+new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from products")
+.mergeMap(noOfProducts => new RxSQL(connection).query<[any]>("SELECT count(1) as noOfCustomers  from customers")
+    .map(noOfCustomers => ({
+        ...noOfCustomers[0], ...noOfProducts[0]
+    }))
+)
+.subscribe(
+(result) => {
+    console.log("Total Products and Customers in DB", result)
+    const transactionSystem = new TransactionSystem({
+        startOrderNumber: eval(startOrderNumber),
+        startSystemTime: startSystemTime,
+        totalCustomer: result.noOfCustomers,
+        totalProducts: result.noOfProducts
+    }, connection);
 
 transactionSystem.orderReceived$()
     .mergeMap(
@@ -54,3 +83,7 @@ transactionSystem.orderReceived$()
         err => console.error(err),
         () => console.info("complete")
     );
+},
+(err) => console.error(err),
+() => ("System Finish")
+)

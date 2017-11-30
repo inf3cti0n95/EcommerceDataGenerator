@@ -13,6 +13,8 @@ npm install
 
 ## Run on CLI
 
+Transactions are printed on the console
+
 ```
 npm start
 
@@ -42,5 +44,3 @@ speed=10 // Speed to to generate transactions in ms
 ```
 
 ### Kafka Producer to Stream Transactions on [kafka branch](https://github.com/inf3cti0n95/EcommerceDataGenerator/tree/kafka)
-
-### MongoDB to Store Transactions on [mongo branch](https://github.com/inf3cti0n95/EcommerceDataGenerator/tree/mongo)

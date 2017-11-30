@@ -19,7 +19,7 @@
     "@types/dotenv": "^4.0.0",
     "@types/kafka-node": "^2.0.1",
     "@types/mysql": "^0.0.34",
-    "chance": "^1.0.10",
+    "chance": "^1.0.12",
     "dotenv": "^4.0.0",
     "kafka-node": "^2.0.1",
     "moment": "^2.18.1",

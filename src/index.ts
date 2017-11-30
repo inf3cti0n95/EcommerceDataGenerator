@@ -4,10 +4,21 @@ import { Observable } from "rxjs";
 import { generateRandomInt } from "./utils";
 import { Chance } from "chance";
 import { config } from "dotenv";
+import { existsSync } from "fs"
 import { TransactionSystem } from "./TransactionSystem";
 import * as moment from 'moment';
 
-config();
+let envFilePath = ".env";
+
+if(existsSync(".env.production"))
+    envFilePath = ".env.production"
+
+if(existsSync(".env.local"))
+    envFilePath = ".env.local"
+
+config({
+    path: envFilePath
+})
 
 const mongodb = require('mongodb');
 const RxMongodb = require("rx-mongodb");

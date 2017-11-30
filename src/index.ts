@@ -11,7 +11,7 @@ const transactionSystem = new TransactionSystem({
     startSystemTime: new Date(1469532278 * 1000),
     totalCustomer: 10000,
     totalProducts: 52010
-}, createConnection("mysql://root@localhost/ecomm"));
+}, createConnection("mysql://root:123456@localhost/ecomm"));
 
 transactionSystem.orderReceived$()
     .mergeMap(
@@ -21,7 +21,7 @@ transactionSystem.orderReceived$()
                 return transaction
             })
     )
-    .mergeMap(
+    .mergeMap<Transaction,Transaction>(
         (transaction: Transaction) => (Chance().bool({ likelihood: 20 }) ? transactionSystem.orderCancelled$(transaction) : transactionSystem.orderShipped$(transaction))
             .map(transaction => {
                 // If Shipped
@@ -34,7 +34,7 @@ transactionSystem.orderReceived$()
                 return Observable.empty()
             })
     )
-    .mergeMap(
+    .mergeMap<Transaction,Transaction>(
         (transaction: Transaction)  => (Chance().bool({ likelihood: 15 }) ? transactionSystem.orderReturned$(transaction) : transactionSystem.orderDelivered$(transaction))
             .map(transaction => {
                 // If Delivered

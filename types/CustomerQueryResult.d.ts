@@ -1,4 +1,4 @@
-interface Customer {
+interface CustomerQueryResult {
     customerId: string,
     firstName: string,
     lastName: string,
@@ -10,7 +10,7 @@ interface Customer {
     pincode: number,
     email: string,
     contactNumber: number,
-    birthday: Date,
+    birthday: string,
     CCType: string,
     CCNumber: string,
     CCExpires: string      

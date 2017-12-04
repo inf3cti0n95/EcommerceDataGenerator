@@ -5,7 +5,6 @@ export declare class TransactionSystem {
     currentSysTime: Date;
     systemConfig: ITransactionSystemConfig;
     DbConnection: IConnection;
-    private randomDeclineMonth;
     constructor(systemConfig: ITransactionSystemConfig, DbConnection: IConnection);
     private getOrderDate;
     private getOrderId;

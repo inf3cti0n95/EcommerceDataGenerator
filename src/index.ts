@@ -24,6 +24,7 @@ const startOrderNumber: any = process.env.initialOrderNumber || 1;
 let startTime: any = process.env.startTime || Date.now()/1000;
 const startSystemTime = new Date(startTime * 1000)
 const DB_ADDRESS = process.env.DBAddress || "mysql://root@localhost/ecomm";
+console.log("MySQL DB Address", DB_ADDRESS);
 const connection = createConnection(DB_ADDRESS);
 
 new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from products")

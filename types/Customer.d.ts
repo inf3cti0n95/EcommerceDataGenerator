@@ -7,11 +7,13 @@ interface Customer {
     city: string,
     state: string,
     country: string,
-    pincode: number,
+    zip: number,
     email: string,
     contactNumber: number,
     birthday: Date,
     CCType: string,
     CCNumber: string,
-    CCExpires: string      
+    CCExpires: string,
+    latitude: number,
+    longitude: number      
 }

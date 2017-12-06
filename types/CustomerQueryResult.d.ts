@@ -7,11 +7,13 @@ interface CustomerQueryResult {
     city: string,
     state: string,
     country: string,
-    pincode: number,
+    zip: number,
     email: string,
     contactNumber: number,
     birthday: string,
     CCType: string,
     CCNumber: string,
-    CCExpires: string      
+    CCExpires: string,
+    longitude: number,
+    latitude: number      
 }

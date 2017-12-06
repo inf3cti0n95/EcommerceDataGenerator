@@ -20,7 +20,7 @@ export class TransactionSystem {
         let dayFactor = parseInt(moment(this.currentSysTime).format("DDD"), 10)
         dayFactor += 366 * parseInt(moment(this.currentSysTime).format("YY"), 10) - parseInt(moment(this.systemConfig.startSystemTime).format("YY"), 10)
         if (this.currentSysTime.getTime() < Date.now())
-            this.currentSysTime = new Date(this.currentSysTime.getTime() + (generateRandomInt(60000, 300000) * 180 / dayFactor))
+            this.currentSysTime = new Date(this.currentSysTime.getTime() + (generateRandomInt(60000, 300000) * 1080 / dayFactor))
         else
             this.currentSysTime = new Date(Date.now())
         return this.currentSysTime;

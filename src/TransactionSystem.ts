@@ -53,7 +53,7 @@ export class TransactionSystem {
                     categories: JSON.parse(result.categories),
                     productPrice: result.price,
                     productId: result.productId,
-                    productName: result.title
+                    productName: result.name
                 }
                 return tempProduct
             })

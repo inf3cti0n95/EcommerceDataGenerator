@@ -96,7 +96,7 @@ new RxSQL(connection).query<[any]>("SELECT count(1) as noOfProducts from product
                     return Observable.empty()
                 })
             )
-            .repeatWhen(() => Observable.interval(orderCyclePerSec))
+            .repeatWhen(() => Observable.interval(orderCyclePerSec*10))
             .do((transaction: Transaction) => {
                 console.log("Last Order Number -", transactionSystem.lastOrderNumber, "Order Status -", transaction.order.status);
                 console.log("Current Time -", transactionSystem.currentSysTime.getTime(), "End Time -", endTime)

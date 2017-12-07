@@ -2,7 +2,7 @@ import { generateRandomInt, generateRandomDate } from "./utils";
 import { Observable, Observer } from "rxjs";
 import { v1 as uuid } from "uuid";
 import { RxSQL } from "rx-sql";
-import { IConnection, format } from "mysql";
+import { IConnection } from "mysql";
 import * as moment from "moment";
 
 export class TransactionSystem {
@@ -32,7 +32,7 @@ export class TransactionSystem {
     }
 
     private getCustomer = () => {
-        return new RxSQL(this.DbConnection).query<CustomerQueryResult[]>(format("SELECT * FROM customers WHERE customerId=?", [generateRandomInt(1, this.systemConfig.totalCustomer)]))
+        return new RxSQL(this.DbConnection).query<CustomerQueryResult[]>(`SELECT * FROM customers WHERE customerId=${generateRandomInt(1, this.systemConfig.totalCustomer)}`)
             .flatMap(result => result)
             .map(result => {
                 let tempCustomer: Customer = {
@@ -76,7 +76,7 @@ export class TransactionSystem {
     private generateRandomProducts = () => {
         let arrayOfProducts = [];
 
-        for (let i = 0; i < generateRandomInt(1, 5); i++) {
+        for (let i = 0; i < generateRandomInt(1, 3); i++) {
             arrayOfProducts.push(generateRandomInt(1, this.systemConfig.totalProducts))
         }
 
